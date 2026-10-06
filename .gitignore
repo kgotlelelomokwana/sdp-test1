@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Application data (cloned repos, uploaded zips, sqlite db)
+backend/data/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.local
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Agent workspace marker
+.aicoding-chat-workspace
