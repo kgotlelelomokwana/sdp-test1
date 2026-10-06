@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useRepos, useRepoMutations } from '../hooks'
 import { fmtDateTime, fmtInt } from '../format'
 import type { Repo } from '../types'
-import { statusDot, statusLabel } from '../components/Sidebar'
+import { statusLabel } from '../components/Sidebar'
 
 export function ReposPage() {
   const navigate = useNavigate()
@@ -218,31 +218,40 @@ function RepoCard({
   deleting: boolean
 }) {
   const busy = repo.status !== 'ready' && repo.status !== 'error'
+  const stateClass = repo.status === 'ready' ? 'status-ready' : repo.status === 'error' ? 'status-error' : 'status-busy'
+  const statusTag = repo.status === 'ready' ? 'tag-green' : repo.status === 'error' ? 'tag-red' : 'tag-yellow'
   return (
-    <div className="repo-card">
-      <div className="repo-card-title">
-        <span className={statusDot(repo)} />
-        <span className="name" title={repo.name}>
-          {repo.name}
-        </span>
-        <span className={`tag ${repo.status === 'ready' ? 'tag-green' : repo.status === 'error' ? 'tag-red' : 'tag-yellow'}`}>
-          {statusLabel(repo)}
-        </span>
-      </div>
-      <div className="repo-card-meta">
-        <div className="ellip" title={repo.source ?? ''}>
-          {repo.source_type === 'url' ? '🌐 ' : '🗜 '}
-          {repo.source}
+    <div className={`repo-card ${stateClass}`}>
+      <div className="repo-card-top">
+        <div className={`repo-avatar${repo.source_type === 'zip' ? ' avatar-zip' : ''}`} aria-hidden="true">
+          {repo.source_type === 'url' ? '🌐' : '🗜'}
         </div>
-        <div className="stat-line">
-          <span>
-            <b>{fmtInt(repo.commit_count)}</b> commits
+        <div className="repo-card-heading">
+          <div className="repo-card-title">
+            <span className="name" title={repo.name}>
+              {repo.name}
+            </span>
+          </div>
+          <div className="repo-card-sub" title={repo.source ?? ''}>
+            {repo.source}
+          </div>
+        </div>
+        <span className={`tag ${statusTag}`}>{statusLabel(repo)}</span>
+      </div>
+      <div className="repo-stats">
+        <div className="repo-stat">
+          <span className="repo-stat-value">{fmtInt(repo.commit_count)}</span>
+          <span className="repo-stat-label">Commits</span>
+        </div>
+        <div className="repo-stat">
+          <span className="repo-stat-value">{fmtInt(repo.author_count)}</span>
+          <span className="repo-stat-label">Authors</span>
+        </div>
+        <div className="repo-stat">
+          <span className="repo-stat-value ref" title={repo.ref}>
+            {repo.ref}
           </span>
-          <span>
-            <b>{fmtInt(repo.author_count)}</b> authors
-          </span>
-          {repo.has_mailmap ? <span className="tag tag-purple">.mailmap</span> : null}
-          <span className="tag">ref {repo.ref}</span>
+          <span className="repo-stat-label">Ref</span>
         </div>
       </div>
       {busy && (
@@ -259,6 +268,7 @@ function RepoCard({
           {repo.ingested_at ? `ingested ${fmtDateTime(Date.parse(repo.ingested_at) / 1000)}` : `added ${repo.created_at.slice(0, 16).replace('T', ' ')}`}
         </span>
         <div className="row">
+          {repo.has_mailmap ? <span className="tag tag-purple">.mailmap</span> : null}
           <button className="btn danger small" disabled={deleting} onClick={onDelete}>
             {deleting ? <span className="spinner" /> : 'Delete'}
           </button>
